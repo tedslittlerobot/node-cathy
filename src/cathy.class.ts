@@ -38,7 +38,7 @@ export default class Cathy<T> {
 	}
 
 	converse(respondTo: string, withResponse: string | ResolvableString, times?: number) {
-		this.assertions.push({
+		return this.addRawAssertion({
 			times,
 			when(exchange) {
 				return exchange.latestReceived?.content.trim() === stripAnsi(respondTo);
@@ -49,7 +49,10 @@ export default class Cathy<T> {
 				return [response];
 			},
 		});
+	}
 
+	addRawAssertion(assertion: RawConversationalAssertion) {
+		this.assertions.push(assertion);
 		return this;
 	}
 
