@@ -41,7 +41,7 @@ export default class Cathy<T> {
 		return this.addRawAssertion({
 			times,
 			when(exchange) {
-				return exchange.latestReceived?.content.trim() === stripAnsi(respondTo);
+				return stripAnsi(exchange.latestReceived?.content ?? '').trim() === respondTo;
 			},
 			async respond(socket) {
 				const response = await resolveResolvableString(withResponse);
