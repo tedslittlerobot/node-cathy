@@ -1,7 +1,7 @@
 import type {Socket} from 'node:net';
 import type {Options, ResultPromise} from 'execa';
 import stripAnsi from 'strip-ansi';
-import {type RawConversationalAssertion, type StringResolver} from './types.js';
+import type {ResolvableString, RawConversationalAssertion} from './types.js';
 import ExchangeLog from './exchange-log.class.js';
 import {resolveResolvableString} from './utils.js';
 
@@ -37,7 +37,7 @@ export default class Cathy<T> {
 		return this.command.stderr as unknown as Socket;
 	}
 
-	converse(respondTo: string, withResponse: string | StringResolver, times?: number) {
+	converse(respondTo: string, withResponse: string | ResolvableString, times?: number) {
 		this.assertions.push({
 			times,
 			when(exchange) {
