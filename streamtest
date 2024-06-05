@@ -1,0 +1,14 @@
+#! /usr/bin/env bash
+
+set -e
+
+>&2 echo "Hello!"
+
+>&2 echo -n "What is your name: "
+read -r name
+>&2 echo "Hello ${name}"
+
+>&2 echo -n "How old are you? "
+read -r age
+
+>&2 echo "You are ${age}! Thanks"
