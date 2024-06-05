@@ -1,14 +1,23 @@
 import type {ExchangeLineDirection, ExchangeLogInterface, Line} from './types.js';
 
+type ExchangeEventHandler = (line: Line) => void;
+
 export default class ExchangeLog implements ExchangeLogInterface {
 	public readonly exchanges: Line[] = [];
+	public onExchange?: ExchangeEventHandler = undefined;
 
 	add(input: string, type: ExchangeLineDirection, source: string) {
-		this.exchanges.push(
-			...input.split('\n')
-				.filter(Boolean)
-				.map(content => ({type, content, source})),
-		);
+		const toAdd: Line[] = input.split('\n')
+			.filter(Boolean)
+			.map(content => ({type, content, source}));
+
+		for (const line of toAdd) {
+			if (this.onExchange) {
+				this.onExchange(line);
+			}
+
+			this.exchanges.push(line);
+		}
 
 		return this;
 	}

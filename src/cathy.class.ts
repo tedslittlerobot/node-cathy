@@ -1,5 +1,6 @@
 import type {Socket} from 'node:net';
 import type {Options, ResultPromise} from 'execa';
+import stripAnsi from 'strip-ansi';
 import {type RawConversationalAssertion, type StringResolver} from './types.js';
 import ExchangeLog from './exchange-log.class.js';
 import {resolveResolvableString} from './utils.js';
@@ -40,7 +41,7 @@ export default class Cathy<T> {
 		this.assertions.push({
 			times,
 			when(exchange) {
-				return exchange.latestReceived?.content.trim() === respondTo;
+				return exchange.latestReceived?.content.trim() === stripAnsi(respondTo);
 			},
 			async respond(socket) {
 				const response = await resolveResolvableString(withResponse);
