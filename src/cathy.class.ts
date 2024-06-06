@@ -7,7 +7,7 @@ import type {
 } from './types.js';
 import ExchangeLog from './exchange-log.class.js';
 import {resolveResolvableString} from './utils.js';
-import {ConversationKillerError} from './errors.conversation-killed.js';
+import ConversationKillerError from './errors.conversation-killed.js';
 
 export default class Cathy<T> implements CathyInterface<T> {
 	private readonly assertions: RawConversationalAssertion[] = [];

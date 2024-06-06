@@ -1,7 +1,7 @@
 import type {SignalConstants} from 'node:os';
 import type {CathyInterface, Line} from './types.js';
 
-export class ConversationKillerError<T> extends Error {
+export default class ConversationKillerError<T> extends Error {
 	constructor(
 		public cathy: CathyInterface<T>,
 		public line: Line,
