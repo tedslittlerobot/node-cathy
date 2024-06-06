@@ -45,8 +45,12 @@ export default class Cathy<T> implements CathyInterface<T> {
 		return this.command.stderr as unknown as Socket;
 	}
 
-	kill(line: Line, reason: string, signal: keyof SignalConstants | number = 'SIGTERM') {
-		this.command.kill(signal, new ConversationKillerError(this, line, reason, signal));
+	kill(line: Line, reason: string | Error, signal: keyof SignalConstants | number = 'SIGTERM') {
+		if (reason instanceof Error) {
+			this.command.kill(signal, reason);
+		} else {
+			this.command.kill(signal, new ConversationKillerError(this, line, reason, signal));
+		}
 	}
 
 	converse(respondTo: string, withResponse: string | ResolvableString, times?: number) {
