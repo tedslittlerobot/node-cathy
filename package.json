@@ -46,6 +46,6 @@
   "main": "lib/index.js",
   "exports": {
     ".": "./lib/index.js",
-    "./errors": "./lib/errors.js"
+    "./lib/errors": "./lib/errors.js"
   }
 }
