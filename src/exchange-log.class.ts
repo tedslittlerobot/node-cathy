@@ -1,3 +1,4 @@
+import stripAnsi from 'strip-ansi';
 import type {ExchangeLineDirection, ExchangeLogInterface, Line} from './types.js';
 
 type ExchangeEventHandler = (line: Line) => void;
@@ -9,7 +10,12 @@ export default class ExchangeLog implements ExchangeLogInterface {
 	add(input: string, type: ExchangeLineDirection, source: string) {
 		const toAdd: Line[] = input.split('\n')
 			.filter(Boolean)
-			.map(content => ({type, content, source}));
+			.map(content => ({
+				type,
+				content,
+				source,
+				cleanedContent: stripAnsi(content).trim(),
+			}));
 
 		for (const line of toAdd) {
 			if (this.onExchange) {

@@ -1,15 +1,19 @@
+import {type SignalConstants} from 'node:os';
 import type {Socket} from 'node:net';
-import type {Options, ResultPromise} from 'execa';
+import type {Options, Result, ResultPromise} from 'execa';
 import stripAnsi from 'strip-ansi';
-import type {ResolvableString, RawConversationalAssertion} from './types.js';
+import type {
+	ResolvableString, RawConversationalAssertion, CathyInterface, Line,
+} from './types.js';
 import ExchangeLog from './exchange-log.class.js';
 import {resolveResolvableString} from './utils.js';
+import {ConversationKillerError} from './errors.conversation-killed.js';
 
-export default class Cathy<T> {
+export default class Cathy<T> implements CathyInterface<T> {
 	private readonly assertions: RawConversationalAssertion[] = [];
 
 	constructor(
-		private readonly command: ResultPromise<T & Options>,
+		public readonly command: ResultPromise<T & Options>,
 		public readonly exchange = new ExchangeLog(),
 	) {}
 
@@ -19,6 +23,10 @@ export default class Cathy<T> {
 		}
 
 		return this.command.stdin as unknown as Socket;
+	}
+
+	sendMessage(message: string, newline = true) {
+		this.stdin.write(`${message}${newline ? '\n' : ''}`);
 	}
 
 	get stdout(): Socket | undefined {
@@ -37,15 +45,21 @@ export default class Cathy<T> {
 		return this.command.stderr as unknown as Socket;
 	}
 
+	kill(line: Line, reason: string, signal: keyof SignalConstants | number = 'SIGTERM') {
+		this.command.kill(signal, new ConversationKillerError(this, line, reason, signal));
+	}
+
 	converse(respondTo: string, withResponse: string | ResolvableString, times?: number) {
 		return this.addRawAssertion({
 			times,
 			when(exchange) {
-				return stripAnsi(exchange.latestReceived?.content ?? '').trim() === respondTo;
+				return exchange.latestReceived?.cleanedContent === respondTo;
 			},
-			async respond(socket) {
+			async respond(cathy) {
 				const response = await resolveResolvableString(withResponse);
-				socket.write(`${response}\n`);
+
+				cathy.sendMessage(response);
+
 				return [response];
 			},
 		});
@@ -62,7 +76,7 @@ export default class Cathy<T> {
 		for (const item of this.assertions.filter(item => item.times === undefined || item.times > 0)) {
 			if (item.when(this.exchange)) {
 				// eslint-disable-next-line no-await-in-loop
-				const responses = await item.respond(this.stdin);
+				const responses = await item.respond<T>(this);
 
 				if (item.times !== undefined) {
 					item.times -= 1;
