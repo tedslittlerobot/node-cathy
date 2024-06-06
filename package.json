@@ -1,6 +1,6 @@
 {
   "name": "@tedslittlerobot/cathy",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A library to enable back-and-forth communication with an underlying script.",
   "repository": {
     "type": "git",
