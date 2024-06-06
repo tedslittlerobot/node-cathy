@@ -36,5 +36,5 @@ export type CathyInterface<T> = {
 	converse(respondTo: string, withResponse: string | ResolvableString, times?: number): void;
 	addRawAssertion(assertion: RawConversationalAssertion): void;
 	run(): Promise<{exchange: ExchangeLogInterface; execa: Result<T & Options>}>;
-	kill(line: Line, reason: string, signal: keyof SignalConstants | number): void;
+	kill(line: Line, reason: string, signal?: keyof SignalConstants | number): void;
 };
