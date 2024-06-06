@@ -45,6 +45,7 @@
   "module": "lib/index.js",
   "main": "lib/index.js",
   "exports": {
-    ".": "./lib/index.js"
+    ".": "./lib/index.js",
+    "./errors": "./lib/errors.js"
   }
 }
