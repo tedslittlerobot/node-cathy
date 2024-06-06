@@ -1,11 +1,14 @@
 import stripAnsi from 'strip-ansi';
-import type {ExchangeLineDirection, ExchangeLogInterface, Line} from './types.js';
-
-type ExchangeEventHandler = (line: Line) => void;
+import type {
+	ExchangeEventHandler,
+	ExchangeLineDirection,
+	ExchangeLogInterface,
+	Line,
+} from './types.js';
 
 export default class ExchangeLog implements ExchangeLogInterface {
 	public readonly exchanges: Line[] = [];
-	public onExchange?: ExchangeEventHandler = undefined;
+	public exchangeHandlers: ExchangeEventHandler[] = [];
 
 	add(input: string, type: ExchangeLineDirection, source: string) {
 		const toAdd: Line[] = input.split('\n')
@@ -18,11 +21,11 @@ export default class ExchangeLog implements ExchangeLogInterface {
 			}));
 
 		for (const line of toAdd) {
-			if (this.onExchange) {
-				this.onExchange(line);
-			}
-
 			this.exchanges.push(line);
+
+			for (const handler of this.exchangeHandlers) {
+				handler(line);
+			}
 		}
 
 		return this;

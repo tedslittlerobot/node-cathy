@@ -16,12 +16,15 @@ export type Line = {
 
 export type RawConversationalAssertion = {
 	times?: number;
-	when(exchange: ExchangeLogInterface): boolean;
+	when(line: Line, exchange: ExchangeLogInterface): boolean;
 	respond<T>(cathy: CathyInterface<T>): Promise<string[]>;
 };
 
+export type ExchangeEventHandler = (line: Line) => void;
+
 export type ExchangeLogInterface = {
 	exchanges: Line[];
+	exchangeHandlers: ExchangeEventHandler[];
 	latest?: Line;
 	latestReceived?: Line;
 	add(input: string, type: ExchangeLineDirection, source: string): ExchangeLogInterface;

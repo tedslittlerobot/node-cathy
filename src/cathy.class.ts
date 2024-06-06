@@ -1,7 +1,6 @@
 import {type SignalConstants} from 'node:os';
 import type {Socket} from 'node:net';
-import type {Options, Result, ResultPromise} from 'execa';
-import stripAnsi from 'strip-ansi';
+import type {Options, ResultPromise} from 'execa';
 import type {
 	ResolvableString, RawConversationalAssertion, CathyInterface, Line,
 } from './types.js';
@@ -15,7 +14,11 @@ export default class Cathy<T> implements CathyInterface<T> {
 	constructor(
 		public readonly command: ResultPromise<T & Options>,
 		public readonly exchange = new ExchangeLog(),
-	) {}
+	) {
+		this.exchange.exchangeHandlers.push(line => {
+			void this.processLine(line);
+		});
+	}
 
 	get stdin(): Socket {
 		if (!this.command.stdin) {
@@ -56,9 +59,7 @@ export default class Cathy<T> implements CathyInterface<T> {
 	converse(respondTo: string, withResponse: string | ResolvableString, times?: number) {
 		return this.addRawAssertion({
 			times,
-			when(exchange) {
-				return exchange.latestReceived?.cleanedContent === respondTo;
-			},
+			when: ({cleanedContent}) => cleanedContent === respondTo,
 			async respond(cathy) {
 				const response = await resolveResolvableString(withResponse);
 
@@ -74,11 +75,9 @@ export default class Cathy<T> implements CathyInterface<T> {
 		return this;
 	}
 
-	async receiveLine(line: string, source: string) {
-		this.exchange.add(line, 'receive', source);
-
+	async processLine(line: Line) {
 		for (const item of this.assertions.filter(item => item.times === undefined || item.times > 0)) {
-			if (item.when(this.exchange)) {
+			if (item.when(line, this.exchange)) {
 				// eslint-disable-next-line no-await-in-loop
 				const responses = await item.respond<T>(this);
 
@@ -109,7 +108,7 @@ export default class Cathy<T> implements CathyInterface<T> {
 
 		for (const [name, stream] of streams) {
 			stream!.on('data', (line: Uint8Array) => {
-				void this.receiveLine(line.toString(), name);
+				this.exchange.add(line.toString(), 'receive', name);
 			});
 		}
 
